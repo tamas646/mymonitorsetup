@@ -1,7 +1,7 @@
 # mymonitorsetup
 Multi-monitor setup manager with custom profiles.
 
-It supports changing the Gnome **dashtopanel** extension's settings with dconf-cli.
+It supports changing your **X server's display settings** and the Gnome **dashtopanel** extension's settings as well.
 
 ## Usage
 Just assign a keyboard shortcut to the command `mymonitorsetup` and then you will be able to switch easily between monitor setups defined in `/etc/mymonitorsetup/profiles.ini`.
