@@ -1,0 +1,100 @@
+#!/usr/bin/python3.7 -W ignore::DeprecationWarning
+
+import os
+import gi
+import configparser
+import re
+
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+from gi.repository import Gdk
+
+# global variables
+app_title = 'Multi-monitor setup profile switcher'
+app_icon = '/usr/share/mymonitorsetup/icon.png'
+config_file = '/etc/mymonitorsetup/profiles.ini'
+app_width = 300 # can be overwritten by config
+app_height = 500 # can be overwritten by config
+modes = {}
+
+# get the primary monitor
+screen = Gdk.Screen.get_default()
+geometry = screen.get_monitor_geometry(screen.get_primary_monitor())
+
+# parse config file
+config = configparser.ConfigParser()
+config.read(config_file)
+for section in config:
+	if section == 'DEFAULT':
+		if 'window-width' in config['DEFAULT']:
+			app_width = int(config['DEFAULT']['window-width'])
+		if 'window-height' in config['DEFAULT']:
+			app_height = int(config['DEFAULT']['window-height'])
+	else:
+		if not 'output[0]' in config[section]:
+			continue
+		modes[section] = { 'displays': [], 'dashtopanel': {} }
+		i = 0
+		while 'output[' + str(i) + ']' in config[section]:
+			modes[section]['displays'].append({})
+			for key in config[section]:
+				result = re.search('^(.+)\[' + str(i) + '\]$', key)
+				if result:
+					modes[section]['displays'][i][result.group(1)] = config[section][key]
+			i += 1
+		for key in config[section]:
+			result = re.search('^dashtopanel-(.+)$', key)
+			if result:
+				modes[section]['dashtopanel'][result.group(1)] = config[section][key]
+
+# create the application window
+fwin = Gtk.Window(
+	title = app_title,
+	type = Gtk.WindowType.TOPLEVEL,
+	decorated = False,
+)
+fwin.set_icon_from_file(app_icon)
+def escape_check(widget, event):
+	if event.keyval == Gdk.KEY_Escape:
+		exit()
+fwin.connect('key_press_event', escape_check)
+
+size = (app_width, app_height)
+pos = (geometry.x + geometry.width / 2 - size[0] / 2, geometry.y + geometry.height / 2 - size[1] / 2)
+
+fwin.set_default_size(size[0], size[1])
+fwin.move(pos[0], pos[1])
+
+scrollview = Gtk.ScrolledWindow()
+vbox = Gtk.VBox()
+
+# define onclick event
+def button_click(button):
+	mode = modes[button.get_label()]
+	command = 'xrandr'
+	for m in mode['displays']:
+		command += ' --output ' + m['output']
+		for o in m:
+			if o == 'output':
+				continue
+			command += ' --' + o + ' ' + m[o]
+	os.system(command)
+	for o in mode['dashtopanel']:
+		os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/' + o + ' ' + mode['dashtopanel'][o])
+	exit(0)
+
+# add profile buttons
+buttons = []
+for mode in modes:
+	buttons.append(Gtk.Button(label = mode))
+for button in buttons:
+	button.connect('clicked', button_click)
+	vbox.pack_start(button, False, False, 2)
+
+# initialize window
+scrollview.add(vbox)
+fwin.add(scrollview)
+
+fwin.connect('destroy', Gtk.main_quit)
+fwin.show_all()
+Gtk.main()

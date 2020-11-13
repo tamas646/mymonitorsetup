@@ -1,0 +1,6 @@
+Package: mymonitorsetup
+Version: 1.2.0
+Architecture: all
+Depends: python3.7-minimal,dconf-cli
+Maintainer: Pesti Tamás <ptamas2002@gmail.com>
+Description: Multi-monitor setup manager with custom profiles.
