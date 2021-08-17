@@ -1,4 +1,4 @@
-#!/usr/bin/python3.7 -W ignore::DeprecationWarning
+#!/usr/bin/python3.9 -W ignore::DeprecationWarning
 
 import os
 import gi

@@ -39,7 +39,7 @@ This script using **xrandr** to apply the changes, therefore every monitor setti
 For these options see `man xrandr`.
 
 ## Installation
-- You can either [download](https://github.com/tamas646/mymonitorsetup/raw/main/mymonitorsetup_1.2.0_all.deb) and install the deb package or use the source code and setup it yourself.
+- You can either [download](https://github.com/tamas646/mymonitorsetup/raw/main/mymonitorsetup_1.2.1_all.deb) and install the deb package or use the source code and setup it yourself.
 
 - If you wish, you can install it from my apt repository too:
 
